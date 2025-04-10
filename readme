@@ -1,76 +1,73 @@
-# TurtleBot Secure Location Messaging System
+TurtleBot Secure Location Messaging System
+A secure communication system that allows TurtleBots to transmit location data over a network using HMAC-signed UDP messages.
+Overview
+This project implements a secure location reporting system with:
 
-This project allows a TurtleBot to securely send its current location over a network using HMAC-signed UDP messages. It includes:
+Sender Script (sender.py) - Transmits signed location data from TurtleBots
+Receiver Script (receiver.py) - Verifies, acknowledges, and stores location data in Redis
 
-- A **Sender Script** (`sender.py`) that transmits signed location data
-- A **Receiver Script** (`receiver.py`) that listens, verifies, acknowledges, and stores this data in Redis
+The system uses HMAC-SHA256 signatures to ensure message integrity and authenticity.
+Features
 
----
+Secure message signing with HMAC-SHA256
+Support for multicast UDP communication
+Redis-based storage for location history
+Message acknowledgment system
+Configurable through JSON configuration file
 
-## Sender Setup Guide (`sender.py`)
+Prerequisites
 
-### 1. Clone the Repository and Navigate to the Directory
+Python 3.6+
+Redis server (for receiver only)
+Network connectivity between sender and receiver
 
-```bash
-git clone <repository-url>
+Setup Instructions
+Sender Setup
+
+Clone the repository
+bashgit clone <repository-url>
 cd <repository-name>
-2. Create and Activate a Python Virtual Environment
-bash
-Copy
-Edit
-sudo apt install python3 python3-pip -y
+
+Create and activate a Python virtual environment
+bashsudo apt install python3 python3-pip -y
 python3 -m venv sender_env
 source sender_env/bin/activate
-3. Install Required Packages
-bash
-Copy
-Edit
-# No external packages required; all used libraries are built into Python
-4. Run the Sender Script
-bash
-Copy
-Edit
-python3 sender.py
-Follow the prompt to input coordinates:
 
-Input numeric x and y values.
+Run the sender script
+bashpython3 sender.py
 
-The script will:
+Follow the prompts to input coordinates
 
-Create a signed message using HMAC-SHA256.
+Enter numeric X and Y values
+The script will create and send signed messages
+You'll receive confirmation for each message sent
 
-Send it to a predefined list of target IPs (TARGET_IPS).
 
-Print confirmation or error messages.
 
-You'll be prompted to send another or exit.
+Receiver Setup
 
-Receiver Setup Guide (receiver.py)
-1. Clone the Repository and Navigate to the Directory
-bash
-Copy
-Edit
-git clone <repository-url>
+Clone the repository
+bashgit clone <repository-url>
 cd <repository-name>
-2. Create and Activate a Python Virtual Environment
-bash
-Copy
-Edit
-sudo apt install python3 python3-pip -y
+
+Create and activate a Python virtual environment
+bashsudo apt install python3 python3-pip -y
 python3 -m venv receiver_env
 source receiver_env/bin/activate
-3. Install Required Packages
-bash
-Copy
-Edit
-pip install redis
-4. (Optional) Create a Configuration File
-You can override default values by creating a config.json in the same folder:
 
-json
-Copy
-Edit
-{
+Install required packages
+bashpip install redis
+
+Start Redis server
+bashredis-server
+
+Run the receiver script
+bashpython3 receiver.py
+
+
+Configuration
+You can override default values by creating a config.json file in the same directory:
+json{
   "multicast_group": "239.1.1.1",
   "multicast_port": 5005,
   "secret_key": "turtlebot3_secret_key",
@@ -80,75 +77,13 @@ Edit
   }
 }
 If this file is not found or is invalid, default values will be used.
-
-5. Start Redis Server
-Make sure Redis is installed and running:
-
-bash
-Copy
-Edit
-redis-server
-6. Run the Receiver Script
-bash
-Copy
-Edit
-python3 receiver.py
-The script will:
-
-Join the specified multicast group and listen for incoming UDP messages.
-
-Verify message integrity using HMAC.
-
-Log valid location messages and store them in Redis with the key format:
-turtlebot:<turtlebot_id>
-
-Respond with an "ACK" to the sender.
-
-Log tampered or invalid messages.
-
-Example Redis Output
-After a valid message is received, you can check Redis:
-
-bash
-Copy
-Edit
-redis-cli
+Checking Stored Data
+After messages are received, you can check the stored data in Redis:
+bashredis-cli
 HGETALL turtlebot:turtlebot_1
-Notes
-Both sender and receiver must use the same SECRET_KEY for HMAC verification.
+Important Notes
 
-Ensure sender and receiver are on the same network/subnet.
-
-If using multicast, some firewalls or routers may require adjustments.
-
-Redis must be running before launching the receiver.
-
-Requirements Summary
-Sender
-Python 3
-
-No external dependencies
-
-Receiver
-Python 3
-
-Redis server
-
-redis Python package
-
-Install Python packages with:
-
-bash
-Copy
-Edit
-pip install redis
-License
-This project is for academic and demo purposes. Not intended for production environments.
-
-yaml
-Copy
-Edit
-
----
-
-You can now copy and paste this whole block into GitHub’s `README.md` or drop it into your project folder direct
+Both sender and receiver must use the same SECRET_KEY for HMAC verification
+Ensure sender and receiver are on the same network/subnet
+Some firewalls or routers may require configuration for multicast traffic
+Redis must be running before launching the receiver
